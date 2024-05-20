@@ -1,0 +1,169 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ToastAndroid } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { Link, useNavigation } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+
+interface LoginProps {
+  onLogin: (isAuthenticated: boolean) => void;
+}
+
+export default function LoginScreen({ onLogin }:LoginProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigation = useNavigation<any>();
+
+  const handleLogin = async () => {
+    try {
+      // Retrieve stored credentials
+      const storedEmail = await SecureStore.getItemAsync('email');
+      const storedPassword = await SecureStore.getItemAsync('password');
+
+      // Check if the entered credentials match the stored credentials
+      if (email === storedEmail && password === storedPassword) {
+        console.log('Logged in successfully');
+        onLogin(true);
+        navigation.navigate('(tabs)');
+      } else {
+        // If incorrect, show an error toast
+        ToastAndroid.show('Invalid email or password', ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      ToastAndroid.show('An error occurred', ToastAndroid.SHORT);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Player's Ruin</Text>
+      </View>
+      <View style={styles.header}>
+        <Text style={styles.title}>Sign in to your account</Text>
+        <Text style={styles.subtitle}>
+          Or
+          <Link style={styles.link} href="/signup">
+            sign up for a new account
+          </Link>
+        </Text>
+      </View>
+      <View style={styles.form}>
+        <View style={styles.inputContainer}>
+          <Icon name="envelope" size={20} color="#888" style={styles.icon} />
+          <TextInput
+            placeholder="Email address"
+            placeholderTextColor="#888"
+            style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
+            value={email}
+            onChangeText={setEmail}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Icon name="lock" size={20} color="#888" style={styles.icon} />
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#888"
+            style={styles.input}
+            secureTextEntry
+            autoComplete="current-password"
+            textContentType="password"
+            value={password}
+            onChangeText={setPassword}
+          />
+        </View>
+        <View style={styles.options}>
+          <View style={styles.rememberMe}>
+            <Icon name="check-square-o" size={20} color="#888" style={styles.checkboxIcon} />
+            <Text style={styles.rememberMeText}>Remember me</Text>
+          </View>
+          <Link style={styles.link} href="#">
+            Forgot your password?
+          </Link>
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Sign in</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#F3F4F6',
+  },
+  header: {
+    marginBottom: 40,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  subtitle: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  link: {
+    color: '#4F46E5',
+    marginLeft: 5,
+  },
+  form: {
+    width: '100%',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 5,
+    marginBottom: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  icon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: '#111827',
+  },
+  options: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  rememberMe: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkboxIcon: {
+    marginRight: 5,
+  },
+  rememberMeText: {
+    fontSize: 14,
+    color: '#111827',
+  },
+  button: {
+    backgroundColor: '#4F46E5',
+    borderRadius: 5,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+});
